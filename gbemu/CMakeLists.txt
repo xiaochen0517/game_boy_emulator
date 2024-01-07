@@ -1,6 +1,9 @@
-set(MAIN_SOURCE main.c)
 
-file (GLOB header "${PROJECT_SOURCE_DIR}/include/*.h")
+set(MAIN_SOURCES
+  main.c
+)
+
+file (GLOB headers "${PROJECT_SOURCE_DIR}/include/*.h")
 
 add_executable(gbemu ${HEADERS} ${MAIN_SOURCES})
 target_link_libraries(gbemu emu)

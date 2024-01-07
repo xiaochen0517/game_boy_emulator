@@ -49,7 +49,7 @@ int emu_run(int argc, char **argv)
   {
     if (ctx.paused)
     {
-      delay(100);
+      delay(10);
       continue;
     }
     if (!cpu_step())
@@ -62,4 +62,9 @@ int emu_run(int argc, char **argv)
   }
 
   return 0;
+}
+
+void emu_cycles(u64 cycles)
+{
+  // TODO...
 }
