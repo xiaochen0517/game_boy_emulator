@@ -43,9 +43,22 @@ typedef struct
   bool destnation_is_mem;
   bool halted;
   bool stepping;
+
+  bool interrupt_master_enabled;
 } cpu_context;
 
 cpu_context cpu_ctx;
 
 void cpu_init();
 bool cpu_step();
+
+typedef void (*IN_PROC)(cpu_context *);
+
+IN_PROC inst_get_processor(in_type type);
+
+u16 cpu_read_reg(reg_type rt);
+
+#define CPU_FLAG_ZERO BIT(cpu_ctx->registers.f, 7);
+#define CPU_FLAG_SUBTRACT BIT(cpu_ctx->registers.f, 6);
+#define CPU_FLAG_HALF_CARRY BIT(cpu_ctx->registers.f, 5);
+#define CPU_FLAG_CARRY BIT(cpu_ctx->registers.f, 4);
