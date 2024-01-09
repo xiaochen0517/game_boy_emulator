@@ -151,7 +151,7 @@ bool cart_load(char *cart)
   fread(ctx.rom_data, ctx.rom_size, 1, fp);
   fclose(fp);
 
-  ctx.header = (rom_header *)(ctx.rom_data + 0x100);
+  ctx.header = (rom_header * )(ctx.rom_data + 0x100);
   ctx.header->title[15] = '\0';
 
   printf("Cart Info:\n");

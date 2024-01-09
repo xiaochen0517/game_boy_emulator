@@ -50,6 +50,7 @@ typedef struct
 cpu_context cpu_ctx;
 
 void cpu_init();
+
 bool cpu_step();
 
 typedef void (*IN_PROC)(cpu_context *);

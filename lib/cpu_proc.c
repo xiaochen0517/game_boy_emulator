@@ -24,19 +24,19 @@ static bool check_cond(cpu_context *cpu_ctx)
 
   switch (cpu_ctx->cur_instruction->cond)
   {
-  case CT_NONE:
-    return true;
-  case CT_CARRY:
-    return is_carry;
-  case CT_NO_CARRY:
-    return !is_carry;
-  case CT_ZERO:
-    return is_zero;
-  case CT_NOT_ZERO:
-    return !is_zero;
-  default:
-    printf("Unknown condition: %d\n", cpu_ctx->cur_instruction->cond);
-    exit(-9);
+    case CT_NONE:
+      return true;
+    case CT_CARRY:
+      return is_carry;
+    case CT_NO_CARRY:
+      return !is_carry;
+    case CT_ZERO:
+      return is_zero;
+    case CT_NOT_ZERO:
+      return !is_zero;
+    default:
+      printf("Unknown condition: %d\n", cpu_ctx->cur_instruction->cond);
+      exit(-9);
   }
 }
 
