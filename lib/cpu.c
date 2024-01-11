@@ -2,7 +2,7 @@
 #include <bus.h>
 #include <emu.h>
 
-cpu_context cpu_ctx = {0};
+static cpu_context cpu_ctx = {0};
 
 void cpu_init()
 {
@@ -14,47 +14,6 @@ static void fetch_instruction()
 {
   cpu_ctx.cur_opcode = bus_read(cpu_ctx.registers.pc++);
   cpu_ctx.cur_instruction = instruction_by_opcode(cpu_ctx.cur_opcode);
-}
-
-static void fetch_data()
-{
-  cpu_ctx.mem_destnation = 0;
-  cpu_ctx.destnation_is_mem = false;
-
-  if (cpu_ctx.cur_instruction == NULL)
-  {
-    return;
-  }
-
-  switch (cpu_ctx.cur_instruction->address_mode)
-  {
-    case AM_IMP:
-      return;
-    case AM_R:
-      cpu_ctx.fetch_data = cpu_read_reg(cpu_ctx.cur_instruction->reg_1);
-      return;
-    case AM_R_D8:
-      cpu_ctx.fetch_data = bus_read(cpu_ctx.registers.pc);
-      emu_cycles(1);
-      cpu_ctx.registers.pc++;
-      return;
-    case AM_D16:
-    {
-      u16 low = bus_read(cpu_ctx.registers.pc);
-      emu_cycles(1);
-      cpu_ctx.registers.pc++;
-      u16 high = bus_read(cpu_ctx.registers.pc);
-      emu_cycles(1);
-      cpu_ctx.registers.pc++;
-      cpu_ctx.fetch_data = (high << 8) | low;
-      return;
-    }
-    default:
-      printf("Unknown address mode: %d (%02X)\n",
-             cpu_ctx.cur_instruction->address_mode,
-             cpu_ctx.cur_opcode);
-      exit(-7);
-  }
 }
 
 static void execute_instruction()

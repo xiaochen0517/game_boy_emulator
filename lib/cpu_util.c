@@ -44,3 +44,57 @@ u16 cpu_read_reg(reg_type rt)
       exit(-6);
   }
 }
+
+void cpu_set_reg(reg_type rt, u16 value)
+{
+  switch (rt)
+  {
+    case RT_A:
+      cpu_ctx.registers.a = value & 0xFF;
+      break;
+    case RT_F:
+      cpu_ctx.registers.f = value & 0xFF;
+      break;
+    case RT_B:
+      cpu_ctx.registers.b = value & 0xFF;
+      break;
+    case RT_C:
+      cpu_ctx.registers.c = value & 0xFF;
+      break;
+    case RT_D:
+      cpu_ctx.registers.d = value & 0xFF;
+      break;
+    case RT_E:
+      cpu_ctx.registers.e = value & 0xFF;
+      break;
+    case RT_H:
+      cpu_ctx.registers.h = value & 0xFF;
+      break;
+    case RT_L:
+      cpu_ctx.registers.l = value & 0xFF;
+      break;
+
+    case RT_AF:
+      *((u16 * ) & cpu_ctx.registers.a) = reverse(value);
+      break;
+    case RT_BC:
+      *((u16 * ) & cpu_ctx.registers.b) = reverse(value);
+      break;
+    case RT_DE:
+      *((u16 * ) & cpu_ctx.registers.d) = reverse(value);
+      break;
+    case RT_HL:
+      *((u16 * ) & cpu_ctx.registers.h) = reverse(value);
+      break;
+
+    case RT_SP:
+      cpu_ctx.registers.sp = value;
+      break;
+    case RT_PC:
+      cpu_ctx.registers.pc = value;
+      break;
+    default:
+      printf("Unknown register type: %d\n", rt);
+      exit(-6);
+  }
+}

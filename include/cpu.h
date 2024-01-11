@@ -47,7 +47,7 @@ typedef struct
   bool interrupt_master_enabled;
 } cpu_context;
 
-cpu_context cpu_ctx;
+static cpu_context cpu_ctx;
 
 void cpu_init();
 
@@ -58,6 +58,10 @@ typedef void (*IN_PROC)(cpu_context *);
 IN_PROC inst_get_processor(in_type type);
 
 u16 cpu_read_reg(reg_type rt);
+
+void fetch_data();
+
+void cpu_set_reg(reg_type rt, u16 value);
 
 #define CPU_FLAG_ZERO BIT(cpu_ctx->registers.f, 7);
 #define CPU_FLAG_SUBTRACT BIT(cpu_ctx->registers.f, 6);
