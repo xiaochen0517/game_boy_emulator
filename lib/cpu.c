@@ -1,5 +1,6 @@
 #include <cpu.h>
 #include <bus.h>
+#include <emu.h>
 
 cpu_context cpu_ctx = {0};
 
