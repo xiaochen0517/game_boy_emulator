@@ -1,8 +1,5 @@
 {
-  "files.associations": {
-    "*.nas": "asm-intel-x86-generic",
-    "stdbool.h": "c",
-    "cpu.h": "c",
-    "common.h": "c"
-  }
+    "files.associations": {
+        "ui.h": "c"
+    }
 }

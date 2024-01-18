@@ -5,32 +5,29 @@
 
 #include <cpu.h>
 
-START_TEST(test_nothing)
-  {
-    bool b = true;
-    ck_assert_uint_eq(b, true);
-  }END_TEST
+START_TEST(test_nothing) {
+    bool b = cpu_step();
+    ck_assert_uint_eq(b, false);
+} END_TEST
 
-Suite *stack_suite()
-{
-  Suite *s = suite_create("emu");
-  TCase *tc = tcase_create("core");
+Suite *stack_suite() {
+    Suite *s = suite_create("emu");
+    TCase *tc = tcase_create("core");
 
-  tcase_add_test(tc, test_nothing);
-  suite_add_tcase(s, tc);
+    tcase_add_test(tc, test_nothing);
+    suite_add_tcase(s, tc);
 
-  return s;
+    return s;
 }
 
-int main()
-{
-  Suite *s = stack_suite();
-  SRunner *sr = srunner_create(s);
-  srunner_run_all(sr, CK_NORMAL);
-  int nf = srunner_ntests_failed(sr);
+int main() {
+    Suite *s = stack_suite();
+    SRunner *sr = srunner_create(s);
+    srunner_run_all(sr, CK_NORMAL);
+    int nf = srunner_ntests_failed(sr);
 
-  srunner_free(sr);
+    srunner_free(sr);
 
-  return nf == 0 ? 0 : -1;
+    return nf == 0 ? 0 : -1;
 }
 

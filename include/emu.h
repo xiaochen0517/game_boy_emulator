@@ -2,15 +2,15 @@
 
 #include <common.h>
 
-typedef struct
-{
-  bool paused;
-  bool running;
-  u64 ticks;
+typedef struct {
+    bool paused;
+    bool running;
+    bool die;
+    u64 ticks;
 } emu_context;
 
-int emu_run(int arc, char **argv);
+int emu_run(int argc, char **argv);
 
 emu_context *emu_get_context();
 
-void emu_cycles(u64 cycles);
+void emu_cycles(int cpu_cycles);

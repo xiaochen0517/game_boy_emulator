@@ -1,56 +1,112 @@
 #include <cpu.h>
 #include <bus.h>
 #include <emu.h>
+#include <interrupts.h>
+#include <dbg.h>
+#include <timer.h>
 
-static cpu_context cpu_ctx = {0};
+cpu_context ctx = {0};
 
-void cpu_init()
-{
-  cpu_ctx.registers.pc = 0x100;
-  cpu_ctx.registers.a = 0x01;
+#define CPU_DEBUG 0
+
+void cpu_init() {
+    ctx.regs.pc = 0x100;
+    ctx.regs.sp = 0xFFFE;
+    *((short *)&ctx.regs.a) = 0xB001;
+    *((short *)&ctx.regs.b) = 0x1300;
+    *((short *)&ctx.regs.d) = 0xD800;
+    *((short *)&ctx.regs.h) = 0x4D01;
+    ctx.ie_register = 0;
+    ctx.int_flags = 0;
+    ctx.int_master_enabled = false;
+    ctx.enabling_ime = false;
+
+    timer_get_context()->div = 0xABCC;
 }
 
-static void fetch_instruction()
-{
-  cpu_ctx.cur_opcode = bus_read(cpu_ctx.registers.pc++);
-  cpu_ctx.cur_instruction = instruction_by_opcode(cpu_ctx.cur_opcode);
+static void fetch_instruction() {
+    ctx.cur_opcode = bus_read(ctx.regs.pc++);
+    ctx.cur_inst = instruction_by_opcode(ctx.cur_opcode);
 }
 
-static void execute_instruction()
-{
-  IN_PROC proc = inst_get_processor(cpu_ctx.cur_instruction->instruction_type);
-  if (!proc)
-  {
-    NOT_IMPLEMENTED
-  }
-  proc(&cpu_ctx);
-}
+void fetch_data();
 
-bool cpu_step()
-{
-  if (!cpu_ctx.halted)
-  {
-    u16 pc = cpu_ctx.registers.pc;
-    fetch_instruction();
-    fetch_data();
+static void execute() {
+    IN_PROC proc = inst_get_processor(ctx.cur_inst->type);
 
-    printf("%04X: %-7s (%02X %02X %02X) A: %02X B: %02X C: %02X\n",
-           pc,
-           inst_name(cpu_ctx.cur_instruction->instruction_type),
-           cpu_ctx.cur_opcode,
-           bus_read(pc + 1),
-           bus_read(pc + 2),
-           cpu_ctx.registers.a,
-           cpu_ctx.registers.b,
-           cpu_ctx.registers.c);
-
-    if (cpu_ctx.cur_instruction == NULL)
-    {
-      printf("Unknown opcode: 0x%02X\n", cpu_ctx.cur_opcode);
-      exit(-6);
+    if (!proc) {
+        NO_IMPL
     }
 
-    execute_instruction();
-  }
-  return true;
+    proc(&ctx);
+}
+
+bool cpu_step() {
+    
+    if (!ctx.halted) {
+        u16 pc = ctx.regs.pc;
+
+        fetch_instruction();
+        emu_cycles(1);
+        fetch_data();
+
+#if CPU_DEBUG == 1
+        char flags[16];
+        sprintf(flags, "%c%c%c%c", 
+            ctx.regs.f & (1 << 7) ? 'Z' : '-',
+            ctx.regs.f & (1 << 6) ? 'N' : '-',
+            ctx.regs.f & (1 << 5) ? 'H' : '-',
+            ctx.regs.f & (1 << 4) ? 'C' : '-'
+        );
+
+        char inst[16];
+        inst_to_str(&ctx, inst);
+
+        printf("%08lX - %04X: %-12s (%02X %02X %02X) A: %02X F: %s BC: %02X%02X DE: %02X%02X HL: %02X%02X\n", 
+            emu_get_context()->ticks,
+            pc, inst, ctx.cur_opcode,
+            bus_read(pc + 1), bus_read(pc + 2), ctx.regs.a, flags, ctx.regs.b, ctx.regs.c,
+            ctx.regs.d, ctx.regs.e, ctx.regs.h, ctx.regs.l);
+#endif
+
+        if (ctx.cur_inst == NULL) {
+            printf("Unknown Instruction! %02X\n", ctx.cur_opcode);
+            exit(-7);
+        }
+
+        dbg_update();
+        dbg_print();
+
+        execute();
+    } else {
+        //is halted...
+        emu_cycles(1);
+
+        if (ctx.int_flags) {
+            ctx.halted = false;
+        }
+    }
+
+    if (ctx.int_master_enabled) {
+        cpu_handle_interrupts(&ctx);
+        ctx.enabling_ime = false;
+    }
+
+    if (ctx.enabling_ime) {
+        ctx.int_master_enabled = true;
+    }
+
+    return true;
+}
+
+u8 cpu_get_ie_register() {
+    return ctx.ie_register;
+}
+
+void cpu_set_ie_register(u8 n) {
+    ctx.ie_register = n;
+}
+
+void cpu_request_interrupt(interrupt_type t) {
+    ctx.int_flags |= t;
 }
